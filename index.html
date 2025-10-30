@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chart Longevity Explorer | Billboard Hot 100 Analysis</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎵 Music Feature Explorer</h1>
+      <p class="subtitle">Discover patterns in Spotify's audio features across genres</p>
+    </header>
+
+    <main>
+      <div class="controls">
+        <div class="control-group genre-checklist">
+          <label>Select Genres to Compare:</label>
+          <div id="genre-checkboxes" class="checkbox-container">
+            <!-- Checkboxes will be dynamically added here -->
+          </div>
+          <div class="genre-buttons">
+            <button id="select-all-genres" class="small-btn">Select All</button>
+            <button id="clear-genres" class="small-btn">Clear All</button>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <label for="y-axis-select">Compare Against Popularity:</label>
+          <select id="y-axis-select">
+            <option value="energy" selected>Energy</option>
+            <option value="danceability">Danceability</option>
+            <option value="valence">Valence (Positivity)</option>
+            <option value="tempo">Tempo</option>
+            <option value="loudness">Loudness</option>
+            <option value="acousticness">Acousticness</option>
+            <option value="speechiness">Speechiness</option>
+          </select>
+        </div>
+        
+        <button id="reset-btn">Reset Filters</button>
+      </div>
+      
+      <div class="filter-sliders">
+        <h3>Filter by Audio Features:</h3>
+        <div class="slider-row">
+          <div class="slider-group">
+            <label>Danceability: <span id="dance-value">0-1</span></label>
+            <input type="range" id="dance-min" min="0" max="100" value="0" class="range-min">
+            <input type="range" id="dance-max" min="0" max="100" value="100" class="range-max">
+          </div>
+          <div class="slider-group">
+            <label>Energy: <span id="energy-value">0-1</span></label>
+            <input type="range" id="energy-min" min="0" max="100" value="0" class="range-min">
+            <input type="range" id="energy-max" min="0" max="100" value="100" class="range-max">
+          </div>
+          <div class="slider-group">
+            <label>Valence (Positivity): <span id="valence-value">0-1</span></label>
+            <input type="range" id="valence-min" min="0" max="100" value="0" class="range-min">
+            <input type="range" id="valence-max" min="0" max="100" value="100" class="range-max">
+          </div>
+        </div>
+      </div>
+
+      <div id="main-chart"></div>
+
+      <div id="stats-panel">
+        <h3>Selection Statistics</h3>
+        <p>Songs displayed: <strong id="song-count">0</strong></p>
+        <p>Average danceability: <strong id="avg-dance">0</strong></p>
+        <p>Average energy: <strong id="avg-energy">0</strong></p>
+        <p>Average valence: <strong id="avg-valence">0</strong></p>
+        <p>Most popular genre: <strong id="top-genre">-</strong></p>
+      </div>
+
+      <section class="writeup">
+        <h2>About This Visualization</h2>
+        
+        <h3>Question</h3>
+        <p>
+          What is the relationship between a song's popularity and its audio characteristics? 
+          Do more popular songs share common features like higher energy, danceability, or positivity? 
+          How do these patterns differ across genres?
+        </p>
+
+        <h3>Design Rationale</h3>
+        <p>
+          I chose an <strong>interactive scatter plot with popularity as the fixed X-axis</strong> 
+          to explore how different audio features relate to a song's success. This design focuses 
+          exploration on the key question: "What makes songs popular?" Interactive elements include:
+        </p>
+        <ul>
+          <li><strong>Fixed popularity axis:</strong> X-axis always shows popularity (0-100 scale) to maintain consistent comparison</li>
+          <li><strong>Dynamic Y-axis selection:</strong> Choose any audio feature to compare against popularity</li>
+          <li><strong>Brushing:</strong> Click and drag to select clusters of songs for detailed analysis</li>
+          <li><strong>Genre checkboxes:</strong> Select one or multiple genres to compare patterns across music styles</li>
+          <li><strong>Range sliders:</strong> Filter songs by danceability, energy, and valence ranges</li>
+          <li><strong>Tooltips:</strong> Hover over points to see song details and all audio features</li>
+          <li><strong>Real-time statistics:</strong> Panel updates with average metrics for filtered data</li>
+        </ul>
+        <p>
+          I considered making both axes dynamic but found that fixing popularity as the independent variable 
+          creates a more focused narrative around understanding what drives song success. The multi-genre 
+          comparison with checkboxes enables discovery of how popularity patterns vary across musical styles.
+        </p>
+
+        <h3>Data Source</h3>
+        <p>
+          <strong>Spotify Tracks Dataset</strong> from Kaggle — Contains 114,000+ tracks with Spotify's 
+          audio features including danceability, energy, valence, tempo, loudness, acousticness, speechiness, 
+          and more across various genres. These features are computed by Spotify's audio analysis algorithms.
+        </p>
+
+        <h3>Development Process</h3>
+        <p>
+          <strong>Team:</strong> Solo project<br>
+          <strong>Time invested:</strong> ~16 hours (3 hours data exploration and sampling, 8 hours D3 implementation, 
+          3 hours interaction design, 2 hours styling and polish)<br>
+          <strong>Challenges:</strong> Handling 114,000+ data points required sampling strategies for performance. 
+          Implementing smooth transitions when changing axes while maintaining brush selections required careful 
+          state management. Normalizing different feature scales (tempo vs. 0-1 features) for fair comparison.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>CSE 442 Assignment 3 | Fall 2025</p>
+    </footer>
+  </div>
+
+  <div id="tooltip"></div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
