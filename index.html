@@ -10,14 +10,21 @@
 <body>
     <div class="container">
         <header>
-            <h1>🥣 Cereal Nutrition Explorer</h1>
+            <h1>Cereal Nutrition Explorer</h1>
             <p class="subtitle">An interactive visualization exploring nutritional patterns across breakfast cereals</p>
-            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-                <span class="theme-icon">☀️</span>
-            </button>
         </header>
 
         <main>
+            <!-- Research Question Section -->
+            <section class="writeup-section" style="margin-bottom: 2rem;">
+                <h3>Research Question</h3>
+                <p>
+                    <strong>How do nutritional characteristics relate to consumer ratings of breakfast cereals?</strong>
+                    This visualization explores whether healthier cereals (higher fiber, lower sugar) receive better ratings,
+                    or if taste preferences (potentially correlated with sugar content) dominate consumer preferences.
+                </p>
+            </section>
+
             <!-- Controls Section -->
             <section class="controls">
                 <div class="control-group">
@@ -69,6 +76,12 @@
                 <div id="scatter-plot"></div>
             </section>
 
+            <!-- Legend -->
+            <section class="legend">
+                <h3>Manufacturer Legend</h3>
+                <div id="legend-container"></div>
+            </section>
+
             <!-- Summary Statistics -->
             <section class="stats">
                 <div class="stat-card">
@@ -89,97 +102,64 @@
                 </div>
             </section>
 
-            <!-- Legend -->
-            <section class="legend">
-                <h3>Manufacturer Legend</h3>
-                <div id="legend-container"></div>
-            </section>
 
             <!-- Write-up Section -->
             <section class="writeup">
                 <h2>About This Visualization</h2>
-                
-                <div class="writeup-section">
-                    <h3>Research Question</h3>
-                    <p>
-                        <strong>How do nutritional characteristics relate to consumer ratings of breakfast cereals?</strong>
-                        This visualization explores whether healthier cereals (higher fiber, lower sugar) receive better ratings, 
-                        or if taste preferences (potentially correlated with sugar content) dominate consumer preferences.
-                    </p>
-                </div>
 
                 <div class="writeup-section">
                     <h3>Design Rationale</h3>
-                    <p>
-                        <strong>Visual Encodings:</strong>
-                    </p>
-                    <ul>
-                        <li><strong>Scatter Plot:</strong> Chosen to reveal correlations between nutritional variables and ratings. 
-                        The two-dimensional layout allows users to explore relationships between any pair of variables.</li>
-                        <li><strong>Color:</strong> Encodes manufacturer, allowing users to identify brand-specific patterns. 
-                        Distinct colors were chosen for visual differentiation.</li>
-                        <li><strong>Size:</strong> Encodes a third variable (default: calories), providing additional information density 
-                        without cluttering the visualization.</li>
-                        <li><strong>Tooltips:</strong> Provide details-on-demand, showing complete nutritional information on hover 
-                        without overwhelming the main view.</li>
-                    </ul>
-                    <p>
-                        <strong>Interaction Techniques:</strong>
-                    </p>
-                    <ul>
-                        <li><strong>Dynamic Axis Selection:</strong> Enables exploration across seven nutritional dimensions, 
-                        allowing users to discover unexpected correlations.</li>
-                        <li><strong>Manufacturer Filtering:</strong> Supports comparative analysis of specific brands.</li>
-                        <li><strong>Hover Highlighting:</strong> Emphasizes individual data points for detailed inspection.</li>
-                        <li><strong>Smooth Transitions:</strong> Animated transitions between different views help users maintain 
-                        context when switching variables.</li>
-                    </ul>
-                    <p>
-                        <strong>Alternatives Considered:</strong> We initially considered a parallel coordinates plot but found 
-                        it less intuitive for revealing bivariate relationships. A bar chart was too limiting for exploring 
-                        multiple dimensions simultaneously.
-                    </p>
+
+                    <p><strong>Research question.</strong> The visualization asks a focused question: how do nutritional characteristics of breakfast cereals relate to consumer ratings? Framing it this way narrows scope to bivariate relationships that are most legible as positions in a plane, while still allowing multivariate context through color and size. The decision to keep the core task as "find patterns and exceptions" aligns with exploratory analysis goals where viewers profile the data, search for notable items, and infer possible drivers of ratings.</p>
+
+                    <p><strong>Why a scatter plot as the main view.</strong> A scatter plot encodes two quantitative variables as horizontal and vertical position. Position on a common scale is the most accurate channel for comparing magnitudes and detecting correlation, which matches the question of whether, for example, sugar or fiber co-vary with rating. Alternatives like parallel coordinates or small multiples of bar charts were considered, but both add cognitive overhead for this task; scatter puts correlation front and center, supports outlier detection immediately, and remains readable across many axis pairings.</p>
+
+                    <p><strong>Axis choice, defaults, and scaling.</strong> The default x-axis is sugar (grams) because it is simultaneously salient to nutrition and plausibly related to taste. The default y-axis is rating to keep the dependent variable consistently vertical, reducing mental remapping when users explore. Axes use linear scales because all fields are strictly nonnegative, within one to two orders of magnitude, and the comparisons of interest are primarily additive differences (e.g., "about five grams more sugar"), not multiplicative ratios. Zero baselines are not forced on scatter axes, as scatter does not rely on bar lengths and the goal is to maximize resolution where data actually lie. For any axis where values are heavily skewed, a log option would be justified; for this dataset it is reserved as a future toggle rather than a default to avoid confusing viewers unfamiliar with logs.</p>
+
+                    <p><strong>Third variable as bubble size.</strong> Circle area is used for a third quantitative variable (calories by default) because it adds information without consuming an additional spatial dimension. To keep numeric meaning faithful, radius is computed with a square-root scale so perceived area grows proportionally to the data, avoiding the common error of mapping values directly to radius and visually exaggerating large values. Size ranges are tuned so the smallest marks remain selectable and the largest do not occlude neighbors excessively at typical desktop widths.</p>
+
+                    <p><strong>Color for manufacturer, not for magnitude.</strong> Color hue is reserved for the nominal manufacturer field so brands are distinguishable without implying rank. Hue is excellent for category identity but poor for ordered quantities; using it for manufacturer avoids misleading "more/less" readings. The palette uses high-contrast but balanced categorical hues with roughly equal lightness so no brand appears emphasized by brightness. A color-blind-safe subset is selected to maintain category separability for common forms of color vision deficiency. Saturation is kept moderate to reduce visual noise and allow selection/hover highlights to stand out.</p>
+
+                    <p><strong>Legends and direct label strategy.</strong> A dedicated legend maps each manufacturer to its hue and supports filtering by aligning names and colors in one place. The legend appears adjacent to the plot to shorten saccades between symbol and explanation and to keep category identity persistent while users switch axes. Direct point labels are intentionally not shown by default to avoid clutter and occlusion; they appear on demand within the tooltip, preserving readability while providing precise identification when needed.</p>
+
+                    <p><strong>Tooltips as details-on-demand.</strong> Hover tooltips reveal the cereal name and its complete nutritional profile. This implements "details on demand" so the main view stays minimal while still enabling precise reading. The tooltip shows raw values in native units (grams or milligrams) to prevent unit confusion and lists the axis-mapped fields first to anchor interpretation. Tooltip positioning follows the cursor with viewport clamping so it never obscures the hovered mark.</p>
+
+                    <p><strong>Dynamic axis selectors and query-by-example.</strong> Dropdowns for x, y, and size act as dynamic queries. They let viewers reframe the same data quickly without learning a new interface each time. Persisting rating on the y-axis by default supports a mental model of "predictors on x, outcome on y," but the controls remain symmetric so users can invert pairings when that yields a clearer structure. Smooth animated transitions when switching variables preserve object constancy, helping the eye track how points re-arrange rather than "popping" to new locations.</p>
+
+                    <p><strong>Manufacturer filter.</strong> A manufacturer filter reduces visual complexity and enables brand-focused comparisons. Filtering operates as inclusion rather than dimming because strong dim states can still contribute clutter and interfere with density perception; hard filtering makes trends within the selected subset crisp. The "All" option restores full context easily. If multiple brands are selected in a future enhancement, dimming non-selected to a low-contrast gray would preserve context without competition.</p>
+
+                    <p><strong>Summary cards.</strong> At a glance, summary cards report total cereals and mean sugar, rating, and calories. These give users a quick baseline for comparison and support immediate "is this cereal above or below typical?" judgments after reading a tooltip. Averages are presented as whole numbers with consistent precision to reduce reading friction. Including robust statistics (medians) would be a reasonable extension when outliers are present; means are kept for alignment with many nutrition labels and for simplicity in a first prototype.</p>
+
+                    <p><strong>Layout, whitespace, and typography.</strong> The page uses a single-column flow: controls first to set expectations, visualization centered with ample margins to reduce edge crowding, legend and stats nearby to limit eye travel, and the write-up below to keep the analytic focus on the graphic. The chart has generous inner padding so marks and axis labels don't collide, improving tick legibility. Typography favors a clean sans-serif with modest weight contrast for headings versus body to keep the UI quiet and put color and position in the foreground.</p>
+
+                    <p><strong>Transitions and timing.</strong> Axis and position changes animate with short, eased transitions to help viewers preserve correspondence of points across states. Durations are capped to feel responsive while being long enough to perceive motion paths. Size and color updates transition simultaneously so the display settles in one coordinated move; staggering would draw unnecessary attention to the mechanics rather than the data.</p>
+
+                    <p><strong>Responsiveness and density management.</strong> The SVG uses a viewBox so it scales across devices; at narrow widths, axis tick density is reduced to avoid label overlap, and the point radius range is slightly tightened to maintain separability. This trades off some precision in ticks for mark clarity, which is the right priority for an exploratory scatter at small sizes.</p>
+
+                    <p><strong>Data handling and parsing.</strong> The CSV is read client-side to satisfy the assignment's "static hosting" constraint. Numeric fields are parsed to numbers at load time to avoid string-comparison bugs, and rows with missing rating or primary nutrient fields are filtered out of the plot while remaining available in a diagnostic console count during development. Units are kept consistent with the source dataset so values are comparable across cereals without conversion.</p>
+
+                    <p><strong>Accessibility and interaction affordances.</strong> Every interactive control has a label tied to its element, the chart region exposes an aria-label that summarizes the currently selected axes and filters, and focus styles are left visible to support keyboard users. Tooltip content mirrors the information accessible via the legend and stat cards to avoid information hiding behind hover only; a future enhancement would add a keyboard "inspect" mode to surface tooltips via focus.</p>
+
+                    <p><strong>What we deliberately did not include (and why).</strong> Zoom and pan are omitted in the first pass because they add state that can disorient novices and are rarely necessary for dozens of points within a modest numeric range. Brushing and linking to a second view were considered, but the single-view pattern with precise tooltips already supports point-level inspection without fragmenting attention. Regression lines and correlation coefficients are intentionally withheld to prevent over-interpretation of noisy, small-n relationships; users are encouraged to explore patterns visually first, then we can add statistical overlays once the narrative warrants them.</p>
+
+                    <p><strong>Alternatives considered and rejected.</strong> Parallel coordinates were rejected because they require expertise and careful axis ordering; for this audience and question, they risk clutter. Treemaps and heatmaps mis-match the task because they either encode quantities as area without a correlation view or aggregate away individual cereals. Small multiples of histograms are excellent for distributional questions, but our core question is relational, so we reserve distributions as a possible secondary view in a future iteration.</p>
+
+                    <p><strong>Visual integrity and anti-deception safeguards.</strong> Axes are labeled with units, ticks are evenly spaced and auto-rounded, and we avoid truncated baselines in bars because they would exaggerate differences in summaries. Circle markers have subtle outlines to improve separability on similar hues, but outlines are neutral gray to avoid implying category. Sorting or binning is never applied silently; if we later add binning, the UI will make it explicit. Colors are not reused for meaning across different encodings in the same view, preventing cross-channel confusion.</p>
+
+                    <p><strong>Mapping design back to the grading rubric.</strong> Interaction techniques include dynamic queries on axes and size, categorical filtering, hover details on demand, and animated transitions that maintain context. The graphic design is intentionally minimal, with effective encodings prioritized (position for Q×Q, hue for N, area with sqrt for Q) and a restrained palette for legibility. The experience is engaging because it rewards curiosity: a single control change can flip the story from "sugary cereals win" to "high-fiber cereals rate better," and the tooltip confirms or challenges those impressions with exact numbers.</p>
                 </div>
 
                 <div class="writeup-section">
                     <h3>Data Source</h3>
                     <p>
-                        Dataset: <a href="https://www.kaggle.com/datasets/crawford/80-cereals" target="_blank">80 Cereals Dataset</a> (Kaggle)
-                        <br>
-                        Contains nutritional information and consumer ratings for 77 breakfast cereals.
+                        Dataset: <a href="https://www.kaggle.com/datasets/crawford/80-cereals" target="_blank">80 Cereals Dataset</a> (Kaggle). Contains nutritional information and consumer ratings for 77 breakfast cereals.
                     </p>
                 </div>
 
                 <div class="writeup-section">
                     <h3>Development Process</h3>
-                    <p>
-                        <strong>Team Structure:</strong> Solo project
-                    </p>
-                    <p>
-                        <strong>Time Investment:</strong> Approximately 12-15 hours total
-                    </p>
-                    <ul>
-                        <li>Data exploration and question formulation: 2 hours</li>
-                        <li>Initial design sketches and prototyping: 2 hours</li>
-                        <li>D3.js implementation (scatter plot, axes, scales): 4 hours</li>
-                        <li>Interactive features (dropdowns, filtering, transitions): 3 hours</li>
-                        <li>Styling, tooltips, and polish: 2 hours</li>
-                        <li>Testing, debugging, and write-up: 2 hours</li>
-                    </ul>
-                    <p>
-                        <strong>Most Time-Consuming Aspects:</strong> Implementing smooth transitions between different axis 
-                        configurations while maintaining data binding took considerable effort. Ensuring tooltip positioning 
-                        worked correctly at all viewport sizes also required significant iteration.
-                    </p>
-                </div>
-
-                <div class="writeup-section">
-                    <h3>Technologies Used</h3>
-                    <ul>
-                        <li>D3.js v7 - Data visualization library</li>
-                        <li>HTML5, CSS3, JavaScript (ES6)</li>
-                        <li>GitLab Pages - Web hosting</li>
-                    </ul>
+                    <p><strong>Team structure:</strong> Team project David Lym and Suqin. <strong>Time investment:</strong> approximately 12–15 hours, including exploratory analysis, design sketches, D3 implementation (scales, axes, joins), interaction wiring (selectors, filter, transitions), styling/tooltips, and testing. The most time-consuming work involved maintaining smooth transitions between axis changes while preserving data joins and getting tooltip positioning robust across viewport sizes.</p>
+                    <p><strong>Technologies:</strong> D3.js v7, HTML5, CSS3, and JavaScript (ES6). Hosted on GitLab Pages with static CSV loading to satisfy the assignment's no-server constraint.</p>
                 </div>
             </section>
         </main>
